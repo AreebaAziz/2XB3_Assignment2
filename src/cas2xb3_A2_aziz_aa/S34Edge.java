@@ -29,4 +29,8 @@ public class S34Edge implements Comparable<S34Edge>{
 		else return -1;
 	}
 	
+	@Override
+	public String toString() {
+		return "" + src + " -> " + dst + " " + meal;
+	}
 }

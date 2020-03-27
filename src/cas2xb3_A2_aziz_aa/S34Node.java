@@ -59,7 +59,7 @@ public class S34Node extends S32Node {
 	
 	@Override
 	public String toString() {
-		return city + " [" + lat + ", " + lon + "]";
+		return city;
 	}
 
 }
