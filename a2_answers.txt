@@ -1,0 +1,16 @@
+Question Answers
+================
+
+[3.1]
+For part 3.2 where we have to find a path from city A to B, we can use a directed graph where each node
+represents a unique city, and each directed edge represents a route from the source city to destination city.
+Since there are no expenses being taken into account for this part, our graph will be unweighted. To find a
+path from city A to B, we can simply use breadth-first search or depth-first search. 
+
+For part 3.4 where we take into account meal expenses and must find the shortest and most cost-effective route, 
+we can use a directed weighted graph where each node represents a unique city. Each directed edge from city A to B
+will represent the cost of a single meal in a restaurant in city B. For example, let's say city B has 2 restaurants, 
+called X and Y. Restaurant X has 2 meals, M1 and M2, and restaurant Y has 1 meal, M1. Then there will be 3 directed 
+edges from city A to B as follows: Restaurant X M1, Restaurant X M2, and Restaurant Y M1. Each of these edges will
+have the weight of the cost of the corresponding meal. Once we traverse the graph, we must make sure we don't take two
+consecutive paths with the same meals. 
