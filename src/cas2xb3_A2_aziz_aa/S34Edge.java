@@ -23,6 +23,10 @@ public class S34Edge implements Comparable<S34Edge>{
 		return meal;
 	}
 	
+	public double cost() {
+		return meal.cost();
+	}
+	
 	public int compareTo(S34Edge otherEdge) {
 		if (meal.cost() > otherEdge.meal.cost()) return 1;
 		else if (meal.cost() == otherEdge.meal.cost()) return 0;

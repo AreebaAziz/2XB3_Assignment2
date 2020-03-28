@@ -224,117 +224,121 @@ public class S34Graph {
 		// now convert the result into a string that represents a csv table
 		String table = "CITY,MEAL CHOICE,COST OF MEAL\n";
 		table += cities.get(startCity).name() + ",,\n"; // add src city. No meal in src city.
-		for (S34Edge edge : minCostRoute) {
+		for (int i = minCostRoute.size() - 1; i >= 0; i--) {
 			// for each edge, get the edge's dst node's city, edge's meal's name, edge's meal's cost
-			table += edge.dst().name() + ",";
-			table += edge.meal().name() + ",";
-			table += "$" + edge.meal().cost() + "\n";
+			table += minCostRoute.get(i).dst().name() + ",";
+			table += minCostRoute.get(i).meal().name() + ",";
+			table += "$" + minCostRoute.get(i).meal().cost() + "\n";
 		}
 		return table;
 	}
 	private List<S34Edge> computeMinCostRoute(S34Node start, S34Node end) {
 		List<S34Edge> minCostRoute = new ArrayList<S34Edge>();
+		/*
+		 * Algorithm - implements Dijkstra's shortest path algorithm:
+		 * 
+		 * 1. Store set of visited nodes. Store Map<node, int shortestDistance> that stores the 
+		 * value of the shortest distance (=lowest cost path) from start node to each other node in the graph.
+		 * Store a Map<node, node> that keeps track of the immediate parent for each node.
+		 * Initialize values so that distance from src->src is 0, and every other distance is set to infinity.
+		 * 
+		 * 2. Starting from the src node: 
+		 * 
+		 * For each outgoing connected city k from the src node, compare k's shortestDistance value with current node's
+		 * shortestDistance value + k's cost value. If the new distance value is less than the old one AND
+		 * the edge's meal != previousMeal, set k's node's shortestDistance value to the new one, 
+		 * and add current node as k's dst node's immediate parent.
+		 * 
+		 * Find the minimum cost edge whose dst node is not in the 
+		 * set of visited nodes. In the above edge iteration loop, keep updating a
+		 * minimumEdge variable accordingly.
+		 * 
+		 * Once the appropriate min edge is found, set the new "previous edge's meal" to the min edge's meal.
+		 * Also add the edge's dst node to set of visited nodes. 
+		 * Set current node to the new node.
+		 * 
+		 * If there is no next min edge, we are done. 
+		 * 
+		 */
+		
+		// variables
+		Set<S34Node> visitedNodes = new HashSet<S34Node>();
+		Map<S34Node, Double> minCostTable = new HashMap<S34Node, Double>();
+		Map<S34Node, S34Edge> immediateParents = new HashMap<S34Node, S34Edge>();
+		Meal previousMeal = null;
+		
+		// add all cities as keys to the minCostTable
+		// set all immediateParents to null
+		for (S34Node city : cities.values()) {
+			minCostTable.put(city, Double.POSITIVE_INFINITY);
+			immediateParents.put(city, null);
+		}
+		
+		// set the cost to start city as 0
+		minCostTable.put(start, Double.valueOf(0));
+		
+		S34Node currentNode = start;
+		S34Edge minPathFromA;	
+		
+		do {
+			minPathFromA = null;
+			visitedNodes.add(currentNode);
+			for (S34Node connectedCity : currentNode.outgoingConnectedNodes()) {
+				// for each connected city from the current node, find the min path from current node to 
+				// connected node. 
+				S34Edge minEdge = currentNode.peekMinEdge(connectedCity);
+				
+				// if this minEdge's meal is the same as previous meal, get the next minEdge.
+				if (minEdge.meal() == previousMeal) {
+					S34Edge oldMinEdge = currentNode.removeMinEdge(connectedCity); // O(logn) to remove from minheap
+					minEdge = currentNode.peekMinEdge(connectedCity); // O(1) to get min from minheap
+					// add back the meal 
+					currentNode.addEdge(oldMinEdge);
+				}
+				
+				// calculate a new cost from start node to connectedCity node given the minEdge.
+				// the cost should be the cost of the current node + the new edge cost
+				double newCost = minCostTable.get(currentNode).doubleValue() + minEdge.cost();
+				
+				// if this new cost is less than the existing cost of the connectedCity, 
+				// update the min cost for the connectedCity.
+				if (newCost < minCostTable.get(connectedCity)) {
+					minCostTable.put(connectedCity, newCost);
+					immediateParents.put(connectedCity, minEdge);
+				}
+			}
+			
+			// find the minPathFromA 
+			for (S34Node node : minCostTable.keySet()) {
+				if (!visitedNodes.contains(node)) {
+					if (minPathFromA == null) minPathFromA = immediateParents.get(node);
+					else if (minCostTable.get(node).doubleValue() < minCostTable.get(minPathFromA.dst()).doubleValue()) {
+						minPathFromA = immediateParents.get(node);
+					}
+				}
+			}
+			
+			// if there's a minPathFromA found, then continue iterating through the graph.
+			if (minPathFromA != null) {		
+				previousMeal = minPathFromA.meal();
+				immediateParents.put(minPathFromA.dst(), minPathFromA);
+				currentNode = minPathFromA.dst();
+			}
+			// if there is no minPathFromA found, then we are done.
+		} while (minPathFromA != null);
+		
+		/*
+		 * Now we should have found the shortest path. 
+		 * To get the path, start with the destination node, and append immediate parents to 
+		 * a list until we reach the source node.
+		 */
+		currentNode = end;
+		S34Edge parent;
+		while ((parent = immediateParents.get(currentNode)) != null) {
+			minCostRoute.add(parent);
+			currentNode = parent.src();
+		}
 		
 		return minCostRoute;
 	}
-	
-//	private List<S34Edge> computeMinCostRoute(S34Node start, S34Node end) {
-//		/*
-//		 * Algorithm - implements Dijkstra's shortest path algorithm:
-//		 * 
-//		 * 1. Store set of visited nodes. Store Map<node, int shortestDistance> that stores the 
-//		 * value of the shortest distance (=lowest cost path) from start node to each other node in the graph.
-//		 * Store a Map<node, ArrayList<node>> that keeps track of the parent paths for each node.
-//		 * Initialize values so that distance from src->src is 0, and every other distance is set to infinity.
-//		 * 
-//		 * 2. Starting from the src node: 
-//		 * 
-//		 * For each edge k from the src node, compare k's dst node's shortestDistance value with current node's
-//		 * shortestDistance value + k's cost value. If the new distance value is less than the old one AND
-//		 * the edge's meal != previousMeal, set k's node's shortestDistance value to the new one, 
-//		 * and add current node to k's dst node's parent list.
-//		 * 
-//		 * Find the minimum cost edge whose dst node is not in the 
-//		 * set of visited nodes. In the above edge iteration loop, keep updating a
-//		 * minimumEdge variable accordingly.
-//		 * 
-//		 * Once the appropriate min edge is found, set the new "previous edge's meal" to the min edge's meal.
-//		 * Also add the edge's dst node to set of visited nodes. 
-//		 * Set current node to the new node.
-//		 * 
-//		 * If there is no next min edge, we are done. 
-//		 * 
-//		 */
-//		
-//		/* variable initializations */
-//		List<S34Edge> minCostRoute = new ArrayList<S34Edge>();
-//		Set<S34Node> visitedNodes = new HashSet<S34Node>();
-//		Map<S34Edge, Double> minCostMap = new HashMap<S34Edge, Double>();
-//		Map<S34Node, S34Edge> immediateParentEdge = new HashMap<S34Node, S34Edge>();
-//		Meal previousMeal = null;
-//		S34Node currentNode;
-//		
-//		/* set initial values */
-//		for (String city : cities.keySet()) {
-//			for (S34Edge edge : cities.get(city).edges()) {
-//				minCostMap.put(edge, Double.POSITIVE_INFINITY);
-//			}
-//			immediateParentEdge.put(cities.get(city), null);
-//		}
-//		currentNode = start;
-//		visitedNodes.add(currentNode);
-//		
-//		/* For each edge from currentNode, find new min cost distances:
-//		 * For each edge k from the src node, compare k's dst node's shortestDistance value with current node's
-//		 * shortestDistance value + k's cost value. If the new distance value is less than the old one, 
-//		 * set k's node's shortestDistance value to the new one, and set current node as k's dst node's parent.
-//		 */
-//		S34Edge minEdge;
-//		do {
-//			minEdge = null;
-//			for (S34Edge edge : currentNode.edges()) {
-//				double newDistance = minCostMap.get(edge).doubleValue() + edge.meal().cost();
-//				double assignedDistance = minCostMap.get(edge);
-//				if (newDistance < minCostMap.get(edge) && edge.meal() != previousMeal) {
-//					minCostMap.put(edge, Double.valueOf(newDistance));
-//					immediateParentEdge.put(edge.dst(), edge);
-//					assignedDistance = newDistance;
-//				}
-//				
-//				// Keep updating a minimumEdge variable accordingly.
-//				if (!visitedNodes.contains(edge.dst()) 
-//						&& (minEdge == null 
-//						|| assignedDistance < minCostMap.get(minEdge).doubleValue())) 
-//				{
-//						minEdge = edge;
-//				}
-//			}
-//			
-//			/* Once the appropriate min edge is found, set the new "previous edge's meal" to the min edge's meal.
-//			 * Also add the edge's dst node to set of visited nodes. 
-//			 * Set current node to the new node.
-//			 * 
-//			 * If there is no next min edge, we are done.
-//			 */ 
-//			if (minEdge != null) {
-//				previousMeal = minEdge.meal();
-//				visitedNodes.add(minEdge.dst());
-//				currentNode = minEdge.dst();
-//			}
-//		} while(minEdge != null);
-//		
-//		/*
-//		 * Now we should have found the shortest path. 
-//		 * To get the path, start with the destination node, and append immediate parents to 
-//		 * a list until we reach the source node.
-//		 */
-//		currentNode = end;
-//		S34Edge parent;
-//		while ((parent = immediateParentEdge.get(currentNode)) != null) {
-//			minCostRoute.add(parent);
-//			currentNode = parent.src();
-//		}
-//		
-//		return minCostRoute;
-//	}
 }

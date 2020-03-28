@@ -1,12 +1,14 @@
 package cas2xb3_A2_aziz_aa;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
 public class S34Node extends S32Node {
 	
-	private Set<S34Edge> edges;
+	private Map<S34Node, PriorityQueue<S34Edge>> edges;
 	private double lon, lat;
 	private Set<Restaurant> restaurants;
 	private Set<Franchise> franchises;
@@ -15,21 +17,31 @@ public class S34Node extends S32Node {
 		super(city);
 		this.lon = lon;
 		this.lat = lat;
-		edges = new HashSet<S34Edge>();
+		edges = new HashMap<S34Node, PriorityQueue<S34Edge>>();
 		restaurants = new HashSet<Restaurant>();
 		franchises = new HashSet<Franchise>();
 	}
 	
 	public void addEdge(S34Edge edge) {
-		edges.add(edge);
+		// check if this edge's dst node already exists in this node's edges map
+		if (!edges.containsKey(edge.dst())) {
+			edges.put(edge.dst(), new PriorityQueue<S34Edge>());
+		}
+		edges.get(edge.dst()).add(edge); // O(logn) operation
 	}
 	
-	public void removeEdge(S34Edge edge) {
-		edges.remove(edge);
+	public S34Edge peekMinEdge(S34Node dst) {
+		// O(1) operation
+		return edges.get(dst).peek();
 	}
 	
-	public Set<S34Edge> edges() {
-		return edges;
+	public S34Edge removeMinEdge(S34Node dst) {
+		// O(logn) operation
+		return edges.get(dst).remove();
+	}
+	
+	public Set<S34Node> outgoingConnectedNodes() {
+		return edges.keySet();
 	}
 	
 	public void addRestaurant(Restaurant r) {
