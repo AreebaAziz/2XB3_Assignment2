@@ -1,16 +1,122 @@
 Question Answers
+by Areeba Aziz
 ================
 
-[3.1]
-For part 3.2 where we have to find a path from city A to B, we can use a directed graph where each node
-represents a unique city, and each directed edge represents a route from the source city to destination city.
-Since there are no expenses being taken into account for this part, our graph will be unweighted. To find a
+[3.1] - Analysis
+----------------
+
+For part 3.2 where we have to find a path from city A to B, we can use a directed 
+graph where each node represents a unique city, and each directed edge represents 
+a route from the source city to destination city. Since there are no expenses 
+being taken into account for this part, our graph will be unweighted. To find a
 path from city A to B, we can simply use breadth-first search or depth-first search. 
 
-For part 3.4 where we take into account meal expenses and must find the shortest and most cost-effective route, 
-we can use a directed weighted graph where each node represents a unique city. Each directed edge from city A to B
-will represent the cost of a single meal in a restaurant in city B. For example, let's say city B has 2 restaurants, 
-called X and Y. Restaurant X has 2 meals, M1 and M2, and restaurant Y has 1 meal, M1. Then there will be 3 directed 
-edges from city A to B as follows: Restaurant X M1, Restaurant X M2, and Restaurant Y M1. Each of these edges will
-have the weight of the cost of the corresponding meal. Once we traverse the graph, we must make sure we don't take two
-consecutive paths with the same meals. 
+In Java implementation, we can represent this graph using adjacency lists in the
+form of a HashMap<Node, ArrayList<Node>>, where each node in the graph is in the 
+keyset of the hashmap, and each node has an arraylist that consists of the 
+outgoing connected nodes.  
+ 
+To find a path from city A to B, we implement the DFS and BFS algorithms as 
+intended with little to no modifications. 
+
+For part 3.4 where we take into account meal expenses and must find the most 
+cost-effective route, we can use a directed weighted graph where each node 
+represents a unique city. Each directed edge from city A to B will represent 
+the cost of a single meal in a restaurant in city B. For example, let's say city B 
+has 2 restaurants, called X and Y. Restaurant X has 2 meals, M1 and M2, and 
+restaurant Y has 1 meal, M1. Then there will be 3 directed edges from city A to B 
+as follows: Restaurant X M1, Restaurant X M2, and Restaurant Y M1. Each of these 
+edges will have the weight of the cost of the corresponding meal. Once we traverse 
+the graph, we must make sure we don't take two consecutive paths with the same meals. 
+So we can keep track of the previous meal that we had, and make sure our next meal 
+is not the same as the previous meal. Once we find the next city to visit, we set 
+the new previous meal as the new meal.
+
+We note that the graph in 3.4 has parallel edges, whereas the graph in 3.2 does not. 
+
+In part 3.4 to find the shortest path from city A to city B, we implement 
+Dijkstra's algorithm as follows:
+		  
+	1. Store set of visited nodes. Store Map<node, int hortestDistance> that 
+	stores the value of the shortest distance (=lowest cost path) from start node 
+	to each other node in the graph. Store a Map<node, node> that keeps track of 
+	the immediate aren't for each node.Initialize values so that distance from 
+	src->src is 0, nd every other distance is set to infinity.
+		  
+	2. Starting from the src node: 
+		  
+	For each outgoing connected city k from the src node, compare k's shortestDistance 
+	value with current node's shortestDistance value + k's cost value. If the 
+	new instance value is less than the old one AND the edge's meal != previousMeal, 
+	set k's node's shortestDistance value to the new one, and add current node as 
+	k's dst node's immediate parent.
+		  
+	Find the minimum cost edge whose dst node is not in the set of visited nodes. 
+		  
+	Once the appropriate min edge is found, set the new previous edge's meal to 
+	the min edge's meal. Also add the edge's dst node to set of visited nodes. 
+	Set current node to the new node.
+		  
+	If there is no next min edge, we are done. 
+
+
+[3.2] BFS vs DFS
+----------------
+
+The breadth-first search algorithm (BFS) found a route from Boston to Minneaopolis 
+in fewer steps compared to the depth-first search algorithm (DFS). 
+
+If the number of nodes increases, it is likely that the BFS algorithm will 
+still find a route with fewer steps due to the nature of how BFS works. In a 
+BFS, we expand outward in our search, adding a new stop in our path only once 
+we know for sure that our destination node is not in the previous level of depth. 
+With DFS however, we search the entire depth of nodes before searching across the 
+breadth of the graph, which may mean that we found a path to our destination 
+node with more stops. This will remain true if the number of nodes increases. 
+However it is still possible for DFS to find a path with the same number of stops as BFS. 
+
+
+[3.4] Shortest Path
+-------------------
+
+I used Dijkstra's algorithm to solve the shortest path problem.
+The complexity of my algorithm is ~ O(N^2) where N is the number of nodes, 
+or cities. 
+
+For each city k, [O(N)]
+
+	I iterate through k's connected outgoing city list [O(N)] to see if we have 
+	a cheaper path to that city. 
+
+	For each outgoing city m from k, we find the cheapest edge that connects 
+	city k to city m. This is done in O(1) because I store the edges from city k 
+	to city m in a min heap priority queue. However, if the minimal edge has the 
+	same meal as the previous edge's meal, we must remove the minimum from the 
+	heap (O(logn)) and peak at the new minimum (O(1)).
+
+Once we're done with city k, to find the next city to go to, 
+we iterate through our cities' cheapest path hashmap and find the cheapest edge. [O(N)] 
+Then we are ready for the next city k and repeat the loop above until there is 
+no next city to visit. 
+
+Therefore, the total cost of this algorithm is
+= O(N^2 + NlogN + N)
+~ O(N^2)
+
+If the number of cities (nodes) increases, the complexity of my algorithm will 
+stay the same as the algorithm doesn't change depending on the size of our input. 
+The runtime itself may be slower due to the larger size of input, but the 
+complexity stays the same. 
+
+If the number of stops between a path is increased, again our complexity 
+doesn't change because regardless of what the shortest path is, we must find 
+all the cheapest paths from the src node to every other node anyway, and the 
+complexity won't increase with more stops. 
+
+If the number of restaurants increases, this would add more parallel edges 
+between each pair of cities in the graph. However, since in my algorithm I use 
+a min heap priority queue to store the edges from one city to another, if the 
+number of restaurants increase this won't affect the complexity of the algorithm. 
+The time to get the minimum edge will still be O(1), unless the minimum edge's 
+meal is the same as the previous meal, in which case it would be O(logn), which 
+would be slower with a greater number of restaurants. 

@@ -1,5 +1,7 @@
 /**
  * @author Areeba Aziz
+ * March 29, 2020
+ * SFRWENG 2XB3 Assignment 4
  */
 
 package cas2xb3_A2_aziz_aa;
@@ -22,6 +24,12 @@ public class S34Graph {
 	private String restaurantsFiles;
 	private Map<String, S34Node> cities;	// this is the graph. Each node has set of directed edges.
 	
+	/**
+	 * @param connectedCities The String filepath for connectedCities data.
+	 * @param citiesFile The String filepath for the city coordinates data.
+	 * @param menuFile The String filepath for the restaurants menu.
+	 * @param restaurantsFiles The String filepath for all the restaurants and their locations.
+	 */
 	public S34Graph(String connectedCities, String citiesFile, String menuFile, String restaurantsFiles) {
 		this.connectedCitiesFile = connectedCities;
 		this.citiesFile = citiesFile;

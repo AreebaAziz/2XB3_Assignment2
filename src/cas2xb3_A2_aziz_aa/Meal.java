@@ -1,3 +1,9 @@
+/**
+ * @author Areeba Aziz
+ * March 29, 2020
+ * SFRWENG 2XB3 Assignment 4
+ */
+
 package cas2xb3_A2_aziz_aa;
 
 public class Meal {
@@ -6,6 +12,11 @@ public class Meal {
 	private Franchise franchise;
 	private double cost;
 	
+	/**
+	 * @param name The name of this meal.
+	 * @param franchise The franchise that this meal belongs to.
+	 * @param cost The cost of this meal.
+	 */
 	public Meal(String name, Franchise franchise, double cost) {
 		this.name = name;
 		this.franchise = franchise;

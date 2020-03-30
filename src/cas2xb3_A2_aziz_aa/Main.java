@@ -1,5 +1,7 @@
 /**
  * @author Areeba Aziz
+ * March 29, 2020
+ * SFRWENG 2XB3 Assignment 4
  */
 package cas2xb3_A2_aziz_aa;
 
@@ -7,6 +9,7 @@ import java.io.FileWriter;
 
 public class Main {
 	
+	// declare constants 
 	private static String startCity = "Boston";
 	private static String endCity = "Minneapolis";
 	private static String connectedCities = "data/connectedCities.txt";
@@ -41,7 +44,12 @@ public class Main {
 		writeToOutput(costEfficientRouteTable, true);
 	}
 	
+	/**
+	 * @param str What to write to file.
+	 * @param append boolean whether to append to the file or not.
+	 */
 	private static void writeToOutput(String str, boolean append) {
+		// helper function to write to an output file
 		try {
 			FileWriter f = new FileWriter(outputFile, append);
 			f.write(str + "\n");
