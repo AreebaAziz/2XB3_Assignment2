@@ -28,6 +28,18 @@ public class S32Graph {
 		cities = new HashMap<String, S32Node>();
 	}
 	
+	public boolean isConnected(String fromCity, String toCity) {
+		S32Node from = cities.get(fromCity.toUpperCase());
+		S32Node to = cities.get(toCity.toUpperCase());
+		return from != null
+				&& to != null
+				&& graph.get(from).contains(to); 
+	}
+	
+	public Set<S32Node> nodes() {
+		return graph.keySet();
+	}
+	
 	public void build() {
 		// read the connectedCities file line by line and add data to graph
 		BufferedReader reader;
@@ -144,7 +156,8 @@ public class S32Graph {
 		for (int i = path.size() - 1; i >= 1; i--) {
 			pathStr += path.get(i) + ", ";
 		}
-		pathStr += path.get(0);
+		
+		if (path.size() > 0) pathStr += path.get(0);
 		return pathStr;
 	}
 	
